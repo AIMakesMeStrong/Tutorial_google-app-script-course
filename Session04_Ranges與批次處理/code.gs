@@ -268,8 +268,10 @@ function 批次更新庫存() {
     var 庫存總值列 = [];
     var 庫存狀態列 = [];
     var 總庫存值 = 0;
+    var 預警清單 = []; // 用於收集需要補貨的商品
 
     for (var i = 1; i < 資料.length; i++) {
+      var 商品名稱 = 資料[i][0]; // A: 商品名稱
       var 單價 = 資料[i][1];     // B: 單價
       var 安全庫存 = 資料[i][2]; // C: 安全庫存量
       var 目前庫存 = 資料[i][3]; // D: 目前庫存
@@ -281,8 +283,10 @@ function 批次更新庫存() {
       var 狀態;
       if (目前庫存 <= 0) {
         狀態 = "🔴 缺貨";
+        預警清單.push("❌ " + 商品名稱 + "：目前庫存 0 (安全水位: " + 安全庫存 + ")");
       } else if (目前庫存 < 安全庫存) {
         狀態 = "🟡 低庫存";
+        預警清單.push("⚠️ " + 商品名稱 + "：目前庫存 " + 目前庫存 + " (安全水位: " + 安全庫存 + ")");
       } else {
         狀態 = "🟢 正常";
       }
@@ -306,8 +310,34 @@ function 批次更新庫存() {
     sheet.getRange(總計列, 6).setValue(總庫存值);
     sheet.getRange(總計列, 6).setNumberFormat("#,##0").setFontWeight("bold").setBackground("#e8f5e9");
 
+    // --- [新增] 發送庫存預警信 ---
+    if (預警清單.length > 0) {
+      var 收件人 = "service9968@gmail.com";
+      var 主旨 = "🚨 庫存水位預警報告 - " + Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy/MM/dd HH:mm");
+      var 內文 = "您好，\n\n系統於執行庫存更新時，偵測到以下商品庫存已低於安全水位，請相關人員儘速安排補貨程序：\n\n" + 
+                 "【低庫存商品清單】\n" + 
+                 "--------------------------------------------------\n" +
+                 預警清單.join("\n") + 
+                 "\n--------------------------------------------------\n\n" +
+                 "💡 建議動作：\n" +
+                 "1. 登入試算表確認庫存細節。\n" +
+                 "2. 聯絡供應商進行採購。\n\n" +
+                 "祝工作順利\n" +
+                 "Google Apps Script 自動化系統";
+      
+      MailApp.sendEmail({
+        to: 收件人,
+        cc: "ppgfnt@gmail.com",
+        bcc: "ppgfnt@go.edu.tw",
+        subject: 主旨,
+        body: 內文
+      });
+      Logger.log("📧 已發送預警信至：" + 收件人 + " (已副本 CC/BCC)");
+    }
+
     Logger.log("✅ 庫存更新完成！總庫存值：NT$" + 總庫存值.toLocaleString());
-    SpreadsheetApp.getUi().alert("✅ 庫存更新完成！\n總庫存值：NT$ " + 總庫存值.toLocaleString());
+    SpreadsheetApp.getUi().alert("✅ 庫存更新完成！\n總庫存值：NT$ " + 總庫存值.toLocaleString() + 
+                                (預警清單.length > 0 ? "\n\n⚠️ 偵測到低庫存項目，已發送預警信。" : ""));
 
   } catch (錯誤) {
     Logger.log("❌ 錯誤：" + 錯誤.message);
