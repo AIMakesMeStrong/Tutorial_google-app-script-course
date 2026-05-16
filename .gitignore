@@ -1,0 +1,16 @@
+# Google Apps Script / clasp
+.clasp.json
+.clasprc.json
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
