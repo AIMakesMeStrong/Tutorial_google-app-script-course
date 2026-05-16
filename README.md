@@ -108,3 +108,7 @@ SessionXX_主題名稱/
 | 平台 | Google Workspace（免費帳號即可） |
 | 程式語言 | JavaScript（Apps Script 環境） |
 | 課程時數 | 30 小時（10 堂 × 3 小時） |
+
+---
+
+> 💡 **進階開發與自動化部署說明**：若您想將此專案部署至自己的 Google 帳號，請參考 [DEVELOPMENT.md](./DEVELOPMENT.md)。
